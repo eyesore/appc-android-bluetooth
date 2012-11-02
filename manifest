@@ -1,0 +1,19 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 0.1
+apiversion: 2
+description: Titanium Mobile Android Module for connecting and receiving 
+data from a bluetooth device.
+author: Garrett Massey and Trey Jones
+license: Specify your license
+copyright: 2012 Eyesore Inc.
+
+
+# these should not be edited
+name: bluetooth
+moduleid: com.eyesore.bluetooth
+guid: 06913ba9-8d40-4b93-91e8-2ce6364f73cc
+platform: android
+minsdk: 2.1.3.GA
