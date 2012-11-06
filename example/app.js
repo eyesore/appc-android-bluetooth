@@ -36,8 +36,6 @@ var tab1 = Titanium.UI.createTab({
 // create controls tab and root window
 //
 d = require('tools');
-d.log('Loading bluetooth module.');
-
 
 var win2 = Titanium.UI.createWindow({  
     title:'Tab 2',
@@ -98,7 +96,7 @@ var deviceView = Ti.UI.createView({
 });
 win2.add(deviceView);
 
-bt.addEventListener('discovery:finished', function(e)
+bt.addEventListener('bluetooth:discovery', function(e)
 {
     d.log(e.devices); 
     d.log(typeof e.devices);   
@@ -143,7 +141,7 @@ var processGpsData = function()
         parser.addData(receivedData.shift());
 };
 
-bt.addEventListener('data:received', function(e)
+bt.addEventListener('bluetooth:data', function(e)
 {
     receivedData.push(e.data);
 });

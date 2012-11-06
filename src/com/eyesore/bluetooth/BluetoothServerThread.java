@@ -39,6 +39,7 @@ public class BluetoothServerThread extends Thread
 	   	 }
 	   	 catch(IOException e){
 	   		 e.printStackTrace();
+	   		 mService.relayError(e.getMessage());
 	   	 }
 		start();
 	}
@@ -57,6 +58,7 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			mService.relayError(e.getMessage());
 		}
 		Log.d(LCAT, "Pairing aborted.");
 	}
@@ -69,6 +71,7 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			mService.relayError(e.getMessage());
 		}
 		Log.d(LCAT, "Connection accepted");
 		
@@ -81,6 +84,7 @@ public class BluetoothServerThread extends Thread
 			}
 			catch(IOException e){
 				e.printStackTrace();
+				mService.relayError(e.getMessage());
 			}	
 		}
 		Log.d(LCAT, "Finished pairing");
@@ -94,6 +98,7 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			mService.relayError(e.getMessage());
 		}
 		
 		mService.setServerSocket(socket);

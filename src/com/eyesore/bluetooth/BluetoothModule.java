@@ -44,8 +44,11 @@ public class BluetoothModule extends KrollModule
 
 	// You can define constants with @Kroll.constant, for example:
 	// @Kroll.constant public static final String EXTERNAL_NAME = value;
-	private final String DISCOVERY_FINISHED = "discovery:finished";
-	private final String DATA_RECEIVED = "data:received";
+	private final String DISCOVERY_FINISHED = "bluetooth:discovery";
+	private final String DATA_RECEIVED = "bluetooth:data";
+	private final String MESSAGE_EVENT = "bluetooth:message";
+	private final String DEVICE_PAIRED = "bluetooth:paired";
+	private final String ERROR_EVENT = "bluetooth:error";
 	
 	public static BluetoothService mBluetooth;
 	private static Context mContext;
@@ -194,8 +197,33 @@ public class BluetoothModule extends KrollModule
 		fireEvent(DATA_RECEIVED, props);
 	}
 	
+	public void devicePaired(BluetoothDevice device)
+	{
+		KrollDict props = new KrollDict();
+		props.put("device", device.getName());
+		
+		fireEvent(DEVICE_PAIRED, props);
+	}
+	
+	public void sendMessage(String message)
+	{
+		KrollDict props = new KrollDict();
+		props.put("message", message);
+		
+		fireEvent(MESSAGE_EVENT, props);
+	}
+	
+	public void sendError(String message)
+	{
+		KrollDict props = new KrollDict();
+		props.put("message", message);
+		
+		fireEvent(ERROR_EVENT, props);
+	}
+	
 	private void disposeService()
 	{
+		//mBluetooth.unregisterReceivers();
 		mBluetooth.stopMessageLoop();
 		mBluetooth.stopBluetoothThreads(); 
 		Intent i = new Intent(mContext, BluetoothService.class);

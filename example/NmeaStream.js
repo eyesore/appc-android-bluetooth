@@ -316,8 +316,16 @@ var typeMap = {
     'RMB': function(){},
     'RMC': function()
     {
-        return ['time', 'status', 'latitude', 'nors1', 'longitude', 'eorw1',
-            'speed', 'track', 'date', 'declination', 'eorw2', 'checksum'];
+        var fields = ['time', 'status', 'latitude', 'nors1', 'longitude', 'eorw1',
+            'speed', 'track', 'date', 'declination', 'eorw2', 'checksum'],
+        properties = {},  
+        i;
+        for(i = 0; i < fields.length; i++)
+        {
+            properties[fields[i]] = this[i].trim();
+        }
+        
+        return properties;
     },
     'ROT': function(){},
     'RPM': function(){},

@@ -116,8 +116,8 @@ public class BluetoothService extends Service{
 		@Override
 		public boolean handleMessage(Message message) {
 			byte[] buffer = (byte[])message.obj;
-			// String dataString = new String(buffer).replace(Character.toString('\0'), "");
-			String dataString = new String(buffer);
+			String dataString = new String(buffer).replace(Character.toString('\0'), "");
+			//String dataString = new String(buffer);
 			//Log.d(LCAT, dataString);
 			mModule.dataReceived(dataString);
 			return false;
@@ -171,10 +171,12 @@ public class BluetoothService extends Service{
 		if (mBluetoothAdapter == null) 
 		{
 		    Log.d(LCAT, "********** Device does not support Bluetooth");
+		    mModule.sendMessage("This device does not support bluetooth.");
 		}
 		else if(mBluetoothAdapter.isEnabled())
 		{
 		    Log.d(LCAT, "********** Bluetooth is enabled");
+		    mModule.sendMessage("Bluetooth is already enabled!");
 		}
 		else
 		{
@@ -183,7 +185,7 @@ public class BluetoothService extends Service{
 			Intent intentBluetooth = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
 			intentBluetooth.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 			
-			mContext.startActivity(intentBluetooth);	        			
+			mContext.startActivity(intentBluetooth);
 		}	
 	}
 	 
@@ -197,11 +199,19 @@ public class BluetoothService extends Service{
 		IntentFilter finishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 		mContext.registerReceiver(finishedReceiver, finishedFilter);
 		
-		IntentFilter connectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
-		mContext.registerReceiver(connectionStateReceiver, connectedFilter);
-		
-		IntentFilter disconnectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-		mContext.registerReceiver(connectionStateReceiver, disconnectedFilter);
+//		IntentFilter connectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
+//		mContext.registerReceiver(connectionStateReceiver, connectedFilter);
+//		
+//		IntentFilter disconnectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+//		mContext.registerReceiver(connectionStateReceiver, disconnectedFilter);
+	}
+	
+	public void unregisterReceivers(){
+		mContext.unregisterReceiver(foundReceiver);
+		mContext.unregisterReceiver(startedReceiver);
+		mContext.unregisterReceiver(finishedReceiver);
+//		mContext.unregisterReceiver(connectionStateReceiver);
+//		mContext.unregisterReceiver(connectionStateReceiver);
 	}
 	 
 	public void findBluetoothDevices(){			
@@ -265,8 +275,14 @@ public class BluetoothService extends Service{
 		mServerThread.abortPairing();
 	}
 	
+	public void relayError(String message)
+	{
+		mModule.sendError(message);
+	}
+	
 	private void establishConnection()
 	{
+		mModule.devicePaired(mRemoteDevice);
 		Looper.prepare();
 		mHandler = new Handler(relayData);
 		mConnectedThread = new BluetoothConnectedThread(mClientSocket, mHandler);

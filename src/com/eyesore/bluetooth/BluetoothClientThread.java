@@ -34,6 +34,7 @@ public class BluetoothClientThread extends Thread
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
+			 mService.relayError(e.getMessage());
 		 }
 		 
 		 start();
@@ -51,11 +52,13 @@ public class BluetoothClientThread extends Thread
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
+			 mService.relayError(e.getMessage());
 			 try{
 				 mSocket.close();
 			 }
 			 catch(IOException ee){
 				 ee.printStackTrace();
+				 mService.relayError(ee.getMessage());
 			 }
 			 return;
 		 }
@@ -69,6 +72,7 @@ public class BluetoothClientThread extends Thread
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
+			 mService.relayError(e.getMessage());
 		 }
 	 }
 	 
