@@ -45,6 +45,7 @@ public class BluetoothModule extends KrollModule
 	// You can define constants with @Kroll.constant, for example:
 	// @Kroll.constant public static final String EXTERNAL_NAME = value;
 	private final String DISCOVERY_FINISHED = "bluetooth:discovery";
+	private final String SERVICES_FOUND = "bluetooth:services";
 	private final String DATA_RECEIVED = "bluetooth:data";
 	private final String MESSAGE_EVENT = "bluetooth:message";
 	private final String DEVICE_PAIRED = "bluetooth:paired";
@@ -115,10 +116,17 @@ public class BluetoothModule extends KrollModule
 	}
 	
 	@Kroll.method
-	public void pairDevice(String deviceName)
+	public void getDeviceServices(String deviceName)
 	{
 		Object deviceAddress = mDevices.get(deviceName);
-		mBluetooth.attemptConnection((String)deviceAddress);
+		mBluetooth.getServiceList((String) deviceAddress);
+	}
+	
+	@Kroll.method
+	public void pairDevice(String deviceName, String serviceName)
+	{
+		Object deviceAddress = mDevices.get(deviceName);
+		mBluetooth.attemptConnection((String)deviceAddress, serviceName);
 	}
 	
 	/**
@@ -164,7 +172,7 @@ public class BluetoothModule extends KrollModule
 	public void discoveryFinished(BluetoothDevice[] devices)
 	{
 		KrollDict allDevices = new KrollDict();
-		Set<BluetoothDevice> bondedDevices = mBluetooth.findBondedDevices();
+		//Set<BluetoothDevice> bondedDevices = mBluetooth.findBondedDevices();
 		
 		// add discovered devices to availableDevices
 		for(Integer j = 0; j < devices.length; j++)
@@ -175,11 +183,11 @@ public class BluetoothModule extends KrollModule
 			}
 		}
 		
-		for(BluetoothDevice d : bondedDevices)
-		{
-			if(!allDevices.containsKey(d))
-				allDevices.put(d.getName(), d.getAddress());
-		}
+//		for(BluetoothDevice d : bondedDevices)
+//		{
+//			if(!allDevices.containsKey(d))
+//				allDevices.put(d.getName(), d.getAddress());
+//		}
 		// make sure it's a new Dict every time discovery occurs
 		mDevices = allDevices;
 		
@@ -189,18 +197,26 @@ public class BluetoothModule extends KrollModule
 		fireEvent(DISCOVERY_FINISHED, props);
 	}
 	
-	public void dataReceived(String data)
+	public void servicesFound(String[] services)
 	{
 		KrollDict props = new KrollDict();
-		props.put("data", data);
+		props.put("services", services);
+		
+		fireEvent(SERVICES_FOUND, props);
+	}
+	
+	public void dataReceived(String source, byte[] data)
+	{
+		KrollDict props = new KrollDict();
+		props.put(source, data);
 		
 		fireEvent(DATA_RECEIVED, props);
 	}
 	
-	public void devicePaired(BluetoothDevice device)
+	public void devicePaired(String deviceName)
 	{
 		KrollDict props = new KrollDict();
-		props.put("device", device.getName());
+		props.put("device", deviceName);
 		
 		fireEvent(DEVICE_PAIRED, props);
 	}

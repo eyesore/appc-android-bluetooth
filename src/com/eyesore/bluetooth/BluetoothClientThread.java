@@ -21,20 +21,20 @@ public class BluetoothClientThread extends Thread
 	 
 	 private BluetoothDevice mDevice;
 	 private BluetoothSocket mSocket;
-	 private final BluetoothService mService;
+	 private final BluetoothConnection mConnection;
 	 
-	 public BluetoothClientThread(BluetoothService service)
+	 public BluetoothClientThread(BluetoothConnection connection)
 	 {
 		 super();
 		 Log.d(LCAT, "Creating new Client thread.");
-		 mService = service;
-		 mDevice = service.getRemoteDevice();
+		 mConnection = connection;
+		 mDevice = connection.getDevice();
 		 try{
-			 mSocket = mDevice.createRfcommSocketToServiceRecord(mService.getServiceUuid());
+			 mSocket = mDevice.createRfcommSocketToServiceRecord(mConnection.getServiceId().mUuid);
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
-			 mService.relayError(e.getMessage());
+			 mConnection.relayError(e.getMessage());
 		 }
 		 
 		 start();
@@ -44,7 +44,7 @@ public class BluetoothClientThread extends Thread
 	 public void run()
 	 {
 		// make sure discovery is cancelled before trying to connect
-		 BluetoothAdapter adapter = mService.getAdapter();
+		 BluetoothAdapter adapter = mConnection.getAdapter();
 		 adapter.cancelDiscovery();
 		 
 		 try{
@@ -52,13 +52,13 @@ public class BluetoothClientThread extends Thread
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
-			 mService.relayError(e.getMessage());
+			 mConnection.relayError(e.getMessage());
 			 try{
 				 mSocket.close();
 			 }
 			 catch(IOException ee){
 				 ee.printStackTrace();
-				 mService.relayError(ee.getMessage());
+				 mConnection.relayError(ee.getMessage());
 			 }
 			 return;
 		 }
@@ -72,13 +72,13 @@ public class BluetoothClientThread extends Thread
 		 }
 		 catch(IOException e){
 			 e.printStackTrace();
-			 mService.relayError(e.getMessage());
+			 mConnection.relayError(e.getMessage());
 		 }
 	 }
 	 
 	 private void handleSocket(BluetoothSocket socket)
 	 {
 		 Log.d(LCAT, "Handling socket");
-		 mService.setClientSocket(socket);
+		 mConnection.setClientSocket(socket);
 	 }
 }

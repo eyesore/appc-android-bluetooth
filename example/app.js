@@ -11,12 +11,9 @@ Titanium.UI.setBackgroundColor('#000');
 var tabGroup = Titanium.UI.createTabGroup();
 var mainActivity;
 var bt = require('com.eyesore.bluetooth');
-var NmeaStream = require('NmeaStream');
+var d = require('tools');
 
-var parserOptions = {
-    acceptTypes: ['RMC']
-};
-var parser = new NmeaStream(parserOptions);
+
 
 //
 // create base UI tab and root window
@@ -31,11 +28,10 @@ var tab1 = Titanium.UI.createTab({
     window:win1
 });
 
-
 //
 // create controls tab and root window
 //
-d = require('tools');
+
 
 var win2 = Titanium.UI.createWindow({  
     title:'Tab 2',
@@ -53,7 +49,7 @@ var buttonView = Ti.UI.createView({
     right: 5,
     width: 100
 });
-win2.add(buttonView);
+win1.add(buttonView);
 
 var devicesView = Ti.UI.createView({
     layout: 'vertical',
@@ -61,7 +57,7 @@ var devicesView = Ti.UI.createView({
     left: 5,
     width: 100
 });
-win2.add(devicesView);
+win1.add(devicesView);
 
 //
 tab2.addEventListener("click", function(e){
@@ -94,12 +90,12 @@ var deviceView = Ti.UI.createView({
     left: 5,
     width: 200
 });
-win2.add(deviceView);
+win1.add(deviceView);
 
+var pairingDevice;
 bt.addEventListener('bluetooth:discovery', function(e)
 {
-    d.log(e.devices); 
-    d.log(typeof e.devices);   
+    d.log(e.devices);   
     var device, deviceButton;
     for(device in e.devices)
     {
@@ -109,7 +105,36 @@ bt.addEventListener('bluetooth:discovery', function(e)
         });
         deviceButton.addEventListener('click', function(e)
         {
-            bt.pairDevice(e.source.getTitle());
+            var newServicesView;
+            bt.addEventListener('bluetooth:services', function(e)
+            {
+                newServicesView = Ti.UI.createView({
+                    layout: 'vertical',
+                    bottom: 5, 
+                    left: 5,
+                    width: 200
+                });                
+                win1.add(newServicesView);
+                
+                var i, serviceButton;
+                for(i = 0; i < e.services.length; i++)
+                {
+                    serviceButton = Ti.UI.createButton({
+                        title: e.services[i],
+                        height: 50
+                    });
+                    
+                    serviceButton.addEventListener('click', function(e)
+                    {
+                        bt.pairDevice(pairingDevice, e.source.title);
+                    });
+                    newServicesView.add(serviceButton);
+                }
+            });
+            
+            pairingDevice = e.source.getTitle();
+            bt.getDeviceServices(pairingDevice);
+            deviceView.hide();           
         });
         deviceView.add(deviceButton);
     }    
@@ -121,7 +146,7 @@ var cancelPairingButton = Ti.UI.createButton({
 });
 cancelPairingButton.addEventListener('click', function(e)
 {
-    parser.getDataQuality();
+    bt.getBondedDevices();
 });
 buttonView.add(cancelPairingButton);
 
@@ -132,43 +157,32 @@ var dataView = Ti.UI.createScrollView({
     layout: 'vertical',
     color: 'black'
 });
-win1.add(dataView);
+win2.add(dataView);
 
-var receivedData = [];
-var processGpsData = function()
+var manageWinSize = function()
 {
-    if(receivedData.length > 0)
-        parser.addData(receivedData.shift());
+    var children = dataView.getChildren();
+    if(children.length > 100)
+    {
+        dataView.remove(children[0]);
+    }
 };
 
 bt.addEventListener('bluetooth:data', function(e)
 {
-    receivedData.push(e.data);
+    dataView.add(Ti.UI.createLabel({
+        text: e.data.toString()
+    }));
+    manageWinSize();
 });
 
-var updateLocation = function()
-{
-    var lastLine = parser.getLast();
-    if(lastLine)
-    {
-        dataView.add(Ti.UI.createLabel({
-            text: lastLine.raw
-        }));
-    }
-};
-
-var gpsloop = setInterval(updateLocation, 2000);
-var processLoop = setInterval(processGpsData, 250);
-
-win2.addEventListener('open', function(e)
+win1.addEventListener('open', function(e)
 {
     mainActivity = e.source.activity;
     mainActivity.addEventListener('destroy', function(e)
     {
         d.log('Destroyed activity.');
         d.log(e);
-        clearInterval(gpsloop);
-        clearInterval(processLoop);
         bt.stopService();
     });
 });

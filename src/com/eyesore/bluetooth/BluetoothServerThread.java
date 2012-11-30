@@ -20,26 +20,26 @@ public class BluetoothServerThread extends Thread
 	// end debugging
 		 
 	// service that opened the thread
-	private final BluetoothService mService;
+	private final BluetoothConnection mConnection;
 	// adapter acting as a bt server
 	private final BluetoothAdapter mBluetoothAdapter;
 	
 	private BluetoothServerSocket mServerSocket;
 	private BluetoothSocket mSocket;
 	
-	public BluetoothServerThread(BluetoothService service)
+	public BluetoothServerThread(BluetoothConnection connection)
 	{
 		super();
-		mService = service;
-		BluetoothAdapter tmpAdapter = mService.getAdapter();
+		mConnection = connection;
+		BluetoothAdapter tmpAdapter = mConnection.getAdapter();
 		mBluetoothAdapter = tmpAdapter;
 		
 		try {
-	   		 mServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("com.eyesore.bluetooth.BluetoothService", mService.getServiceUuid());
+	   		 mServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("com.eyesore.bluetooth.BluetoothService", mConnection.getServiceId().mUuid);
 	   	 }
 	   	 catch(IOException e){
 	   		 e.printStackTrace();
-	   		 mService.relayError(e.getMessage());
+	   		 mConnection.relayError(e.getMessage());
 	   	 }
 		start();
 	}
@@ -58,7 +58,7 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			mService.relayError(e.getMessage());
+			mConnection.relayError(e.getMessage());
 		}
 		Log.d(LCAT, "Pairing aborted.");
 	}
@@ -71,7 +71,7 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			mService.relayError(e.getMessage());
+			mConnection.relayError(e.getMessage());
 		}
 		Log.d(LCAT, "Connection accepted");
 		
@@ -84,7 +84,7 @@ public class BluetoothServerThread extends Thread
 			}
 			catch(IOException e){
 				e.printStackTrace();
-				mService.relayError(e.getMessage());
+				mConnection.relayError(e.getMessage());
 			}	
 		}
 		Log.d(LCAT, "Finished pairing");
@@ -98,9 +98,9 @@ public class BluetoothServerThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
-			mService.relayError(e.getMessage());
+			mConnection.relayError(e.getMessage());
 		}
 		
-		mService.setServerSocket(socket);
+		mConnection.setServerSocket(socket);
 	}	
 }
