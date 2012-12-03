@@ -1,5 +1,6 @@
 package com.eyesore.bluetooth;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import org.appcelerator.kroll.common.Log;
@@ -39,9 +40,7 @@ class BluetoothConnection extends Object
 		mDevice = device;
 		mServiceId = serviceId;
 		
-		UUID uuid = BluetoothCommonServiceIds.getUuidByDescription(serviceId.mDescription);
-		
-		Handler.Callback mCallback = new Handler.Callback() {		
+		mCallback = new Handler.Callback() {		
 			@Override
 			public boolean handleMessage(Message message) {
 				byte[] buffer = (byte[])message.obj;
@@ -92,9 +91,30 @@ class BluetoothConnection extends Object
 		return mDevice;
 	}
 	
+	public void abortPairing()
+	{
+		mServerThread.abortPairing();
+	}
+	
 	public void relayError(String message)
 	{
 		mBluetooth.relayError(message);
+	}
+	
+	public void stopBluetoothThreads()
+	{
+		try{
+			mClientSocket.close();
+		}
+		catch(IOException e){
+			e.printStackTrace();
+		}
+	}
+	
+	public void stopMessageLoop()
+	{
+		Looper.myLooper().quit();
+		mConnected.stopThread();	
 	}
 	
 	private void connect()

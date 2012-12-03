@@ -70,7 +70,6 @@ public class BluetoothModule extends KrollModule
 		mBluetooth = new BluetoothService(mContext);
 		
 		Intent i = new Intent(mContext, BluetoothService.class);		
-		IBinder binder = mBluetooth.onBind(i);
 		
 		mConnection = new ServiceConnection(){
 			@Override
@@ -118,15 +117,13 @@ public class BluetoothModule extends KrollModule
 	@Kroll.method
 	public void getDeviceServices(String deviceName)
 	{
-		Object deviceAddress = mDevices.get(deviceName);
-		mBluetooth.getServiceList((String) deviceAddress);
+		mBluetooth.getServiceList(getAddress(deviceName));
 	}
 	
 	@Kroll.method
 	public void pairDevice(String deviceName, String serviceName)
 	{
-		Object deviceAddress = mDevices.get(deviceName);
-		mBluetooth.attemptConnection((String)deviceAddress, serviceName);
+		mBluetooth.attemptConnection(getAddress(deviceName), serviceName);
 	}
 	
 	/**
@@ -135,9 +132,9 @@ public class BluetoothModule extends KrollModule
 	 * This would rapidly drain device power.
 	 */
 	@Kroll.method
-	public void abortPairing()
+	public void abortPairing(String device)
 	{
-		mBluetooth.abortPairing();
+		mBluetooth.abortPairing(getAddress(device));
 	}
 	
 	@Kroll.method
@@ -237,11 +234,16 @@ public class BluetoothModule extends KrollModule
 		fireEvent(ERROR_EVENT, props);
 	}
 	
+	private String getAddress(String deviceName)
+	{
+		String deviceAddress = (String) mDevices.get(deviceName);
+		return deviceAddress;
+	}
+	
 	private void disposeService()
 	{
 		//mBluetooth.unregisterReceivers();
-		mBluetooth.stopMessageLoop();
-		mBluetooth.stopBluetoothThreads(); 
+		mBluetooth.closeAllConnections(); 
 		Intent i = new Intent(mContext, BluetoothService.class);
 		mContext.unbindService(mConnection);
 		mContext.stopService(i);

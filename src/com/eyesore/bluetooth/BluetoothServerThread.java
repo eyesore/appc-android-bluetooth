@@ -9,8 +9,6 @@ import android.bluetooth.BluetoothSocket;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 
-import com.eyesore.bluetooth.BluetoothService;
-
 
 public class BluetoothServerThread extends Thread 
 {

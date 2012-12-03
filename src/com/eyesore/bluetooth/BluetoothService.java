@@ -24,6 +24,7 @@ import android.os.ParcelUuid;
 
 import android.content.Context;
 
+import org.appcelerator.kroll.KrollDict;
 import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 
@@ -49,14 +50,11 @@ public class BluetoothService extends Service{
 	 private final BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 	 private BluetoothDevice mRemoteDevice;
 	 
-	 private UUID mRemoteServiceUuid;
-	 
-	 private BluetoothSocket mServerSocket;
-	 private BluetoothSocket mClientSocket;	 
-	 private BluetoothServerThread mServerThread;
-	 private BluetoothClientThread mClientThread;
+	 private UUID mRemoteServiceUuid;	 
 	 private BluetoothConnectedThread mConnectedThread;
-	 private Handler mHandler;
+	 private KrollDict mConnections = new KrollDict();
+	 private String[] mConnectedDevices = new String[10];
+	 private int deviceCounter = 0;
 	 
 	 private final BroadcastReceiver foundReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
@@ -221,29 +219,35 @@ public class BluetoothService extends Service{
 		Log.d(LCAT, serviceId.toString());
 		Log.d(LCAT, "Attempting to pair with device: " + remoteDevice.toString());
 		
-		// TODO create some type of data struction to hold connections
-		BluetoothConnection connection = new BluetoothConnection(this, remoteDevice, serviceId);
+		// Store reference to connection keyed on remote Address - TODO key off device name?
+		mConnections.put(remoteAddress, new BluetoothConnection(this, remoteDevice, serviceId));
+		addConnectedDevice(remoteAddress);
 	}
 	
-	public void stopBluetoothThreads()
+	public void stopBluetoothThreads(String deviceAddress)
 	{
-		try{
-			mClientSocket.close();
+		getConnection(deviceAddress).stopBluetoothThreads();
+	}
+	
+	public void stopMessageLoop(String deviceAddress)
+	{
+		getConnection(deviceAddress).stopMessageLoop();			
+	}
+	
+	public void closeAllConnections()
+	{
+		for(int i = 0; i < mConnectedDevices.length; i++)
+		{
+			stopMessageLoop(mConnectedDevices[i]);
+			stopBluetoothThreads(mConnectedDevices[i]);
 		}
-		catch(IOException e){
-			e.printStackTrace();
-		}
+		
+		mConnectedDevices = new String[10];
 	}
 	
-	public void stopMessageLoop()
+	public void abortPairing(String deviceAddress)
 	{
-		Looper.myLooper().quit();
-		mConnectedThread.stopThread();		
-	}
-	
-	public void abortPairing()
-	{
-		mServerThread.abortPairing();
+		getConnection(deviceAddress).abortPairing();
 	}
 	
 	public void relayError(String message)
@@ -311,5 +315,17 @@ public class BluetoothService extends Service{
 	private String getServiceDescription(UUID serviceId)
 	{
 		return BluetoothCommonServiceIds.getDescription(serviceId);
+	}
+	
+	private BluetoothConnection getConnection(String deviceAddress)
+	{
+		BluetoothConnection connection = (BluetoothConnection)mConnections.get(deviceAddress);
+		return connection;
+	}
+	
+	private void addConnectedDevice(String deviceAddress)
+	{
+		mConnectedDevices[deviceCounter] = deviceAddress;
+		deviceCounter++;
 	}
 }

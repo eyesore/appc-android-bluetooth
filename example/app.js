@@ -84,6 +84,12 @@ findDevicesButton.addEventListener('click', function(e)
 });
 buttonView.add(findDevicesButton);
 
+var abortPairingButton = Ti.UI.createButton({
+    title: 'Abort Pairing',
+    height: 70
+});
+buttonView.add(abortPairingButton);
+
 var deviceView = Ti.UI.createView({
     layout: 'vertical',
     bottom: 5,
@@ -126,6 +132,16 @@ bt.addEventListener('bluetooth:discovery', function(e)
                     
                     serviceButton.addEventListener('click', function(e)
                     {
+                        var abortPairing = function(e)
+                        {
+                            bt.abortPairing(pairingDevice);
+                        };
+                        abortPairingButton.addEventListener('click', abortParing);
+
+                        bt.addEventListener('bluetooth:paired', function(e)
+                        {
+                            handleConnection(e.device);
+                        });
                         bt.pairDevice(pairingDevice, e.source.title);
                     });
                     newServicesView.add(serviceButton);
@@ -139,16 +155,6 @@ bt.addEventListener('bluetooth:discovery', function(e)
         deviceView.add(deviceButton);
     }    
 });
-
-var cancelPairingButton = Ti.UI.createButton({
-    title: 'Abort Pairing',
-    height: 70
-});
-cancelPairingButton.addEventListener('click', function(e)
-{
-    bt.getBondedDevices();
-});
-buttonView.add(cancelPairingButton);
 
 var dataView = Ti.UI.createScrollView({
     top: 5,
