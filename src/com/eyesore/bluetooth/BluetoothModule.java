@@ -18,6 +18,7 @@ import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 
 import org.appcelerator.titanium.TiApplication;
+import org.appcelerator.titanium.TiBlob;
 
 import android.bluetooth.BluetoothDevice;
 
@@ -46,7 +47,7 @@ public class BluetoothModule extends KrollModule
 	// @Kroll.constant public static final String EXTERNAL_NAME = value;
 	private final String DISCOVERY_FINISHED = "bluetooth:discovery";
 	private final String SERVICES_FOUND = "bluetooth:services";
-	private final String DATA_RECEIVED = "bluetooth:data";
+	private final String DATA_RECEIVED = "bluetooth:data:";
 	private final String MESSAGE_EVENT = "bluetooth:message";
 	private final String DEVICE_PAIRED = "bluetooth:paired";
 	private final String ERROR_EVENT = "bluetooth:error";
@@ -62,7 +63,7 @@ public class BluetoothModule extends KrollModule
 	public BluetoothModule()
 	{
 		super();
-		final BluetoothModule self = this;
+		final BluetoothModule self = this;  // here's to javascript
 		TiApplication appContext = TiApplication.getInstance();
 		Activity currentActivity = appContext.getCurrentActivity();
 		mContext = currentActivity.getBaseContext();
@@ -143,21 +144,21 @@ public class BluetoothModule extends KrollModule
 		disposeService();
 	}
 	
-	@Kroll.method
-	public void getBondedDevices()
-	{
-		Set<BluetoothDevice> devices = mBluetooth.findBondedDevices();
-		for(BluetoothDevice d : devices)
-		{
-			Log.d(LCAT, d.getName());
-			ParcelUuid[] parcels = d.getUuids();  // API 15 or higher only
-			for(ParcelUuid p : parcels)
-			{
-				Log.d(LCAT, p.getUuid().toString());
-			}
-			Log.d(LCAT, "Bond state: " + d.getBondState());
-		}
-	}
+//	@Kroll.method
+//	public void getBondedDevices()
+//	{
+//		Set<BluetoothDevice> devices = mBluetooth.findBondedDevices();
+//		for(BluetoothDevice d : devices)
+//		{
+//			Log.d(LCAT, d.getName());
+//			ParcelUuid[] parcels = d.getUuids();  // API 15 or higher only
+//			for(ParcelUuid p : parcels)
+//			{
+//				Log.d(LCAT, p.getUuid().toString());
+//			}
+//			Log.d(LCAT, "Bond state: " + d.getBondState());
+//		}
+//	}
 	
 	/**
 	 * This will fire an event containing any devices found during discovery, 
@@ -176,15 +177,17 @@ public class BluetoothModule extends KrollModule
 		{
 			if(devices[j] != null && !allDevices.containsKey(devices[j]))
 			{
+				try{
+					mBluetooth.startSdp(devices[j]);
+				}
+				catch(Exception e){
+					e.printStackTrace();
+					sendError(e.getMessage());
+				}
 				allDevices.put(devices[j].getName(), devices[j].getAddress());
 			}
 		}
 		
-//		for(BluetoothDevice d : bondedDevices)
-//		{
-//			if(!allDevices.containsKey(d))
-//				allDevices.put(d.getName(), d.getAddress());
-//		}
 		// make sure it's a new Dict every time discovery occurs
 		mDevices = allDevices;
 		
@@ -204,10 +207,12 @@ public class BluetoothModule extends KrollModule
 	
 	public void dataReceived(String source, byte[] data)
 	{
+		TiBlob blob = TiBlob.blobFromData(data);
 		KrollDict props = new KrollDict();
-		props.put(source, data);
-		
-		fireEvent(DATA_RECEIVED, props);
+		props.put("data", blob);
+		Log.d(LCAT, "Firing event: " + DATA_RECEIVED + source);
+		fireEvent(DATA_RECEIVED + source, props);
+		Log.d(LCAT, "Message sent!");
 	}
 	
 	public void devicePaired(String deviceName)
@@ -242,11 +247,11 @@ public class BluetoothModule extends KrollModule
 	
 	private void disposeService()
 	{
-		//mBluetooth.unregisterReceivers();
 		mBluetooth.closeAllConnections(); 
 		Intent i = new Intent(mContext, BluetoothService.class);
 		mContext.unbindService(mConnection);
 		mContext.stopService(i);
+		mBluetooth.unregisterReceivers();
 		mBluetooth = null;
 	}
 }

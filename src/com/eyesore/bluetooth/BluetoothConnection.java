@@ -44,10 +44,7 @@ class BluetoothConnection extends Object
 			@Override
 			public boolean handleMessage(Message message) {
 				byte[] buffer = (byte[])message.obj;
-				//String dataString = new String(buffer).replace(Character.toString('\0'), "");
-				//String dataString = new String(buffer);
-				//Log.d(LCAT, dataString);
-				mBluetooth.dataReceived(mServiceId.mDescription, buffer);
+				mBluetooth.dataReceived(mDevice.getName(), buffer);
 				return false;
 			}
 		};
@@ -101,20 +98,26 @@ class BluetoothConnection extends Object
 		mBluetooth.relayError(message);
 	}
 	
+	public void relayMessage(String message)
+	{
+		mBluetooth.relayMessage(message);
+	}
+	
 	public void stopBluetoothThreads()
 	{
+		mConnected.stopThread();
+	}
+	
+	public void stopMessageLoop()
+	{
+		// Looper.myLooper().quit();
 		try{
 			mClientSocket.close();
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			relayMessage(e.getMessage());
 		}
-	}
-	
-	public void stopMessageLoop()
-	{
-		Looper.myLooper().quit();
-		mConnected.stopThread();	
 	}
 	
 	private void connect()
@@ -123,7 +126,7 @@ class BluetoothConnection extends Object
 		
 		Looper.prepare();
 		mHandler = new Handler(mCallback);
-		mConnected = new BluetoothConnectedThread(mClientSocket, mHandler);
+		mConnected = new BluetoothConnectedThread(this, mClientSocket, mHandler);
 		Looper.loop();
 	}
 }

@@ -2,7 +2,7 @@ package com.eyesore.bluetooth;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.OutputStream;  // TODO
 
 import org.appcelerator.kroll.common.TiConfig;
 import org.appcelerator.kroll.common.Log;
@@ -13,7 +13,7 @@ import android.os.Handler;
 public class BluetoothConnectedThread extends Thread
 {
 	// Debugging vars
-	 private static final String LCAT = "BluetoothServerThread";
+	 private static final String LCAT = "BluetoothConnectedThread";
 	 private static final boolean DBG = TiConfig.LOGD;
 	// end debugging
 		 
@@ -21,14 +21,17 @@ public class BluetoothConnectedThread extends Thread
 	// private final OutputStream mmOutStream; TODO
 	private final Handler mHandler;
 	private final BluetoothSocket mSocket;
+	private final BluetoothConnection mConnection;
 	
 	private Boolean running = true;
 	
-	public BluetoothConnectedThread(BluetoothSocket socket, Handler handler)
+	public BluetoothConnectedThread(BluetoothConnection connection, BluetoothSocket socket, Handler handler)
 	{
 		super();
 		mHandler = handler;
 		mSocket = socket;
+		mConnection = connection;
+		
 		InputStream tmpIn = null;
 		//OutputStream tmpOut = null;  TODO
 		
@@ -38,6 +41,7 @@ public class BluetoothConnectedThread extends Thread
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			mConnection.relayError(e.getMessage());
 		}
 		
 		mmInStream = tmpIn;
@@ -54,23 +58,25 @@ public class BluetoothConnectedThread extends Thread
 		
 		while(running)
 		{
-			buffer = new byte[512];
+			buffer = new byte[1024];
 			try{
 				mmInStream.read(buffer);
-				//Log.d(LCAT, new String(buffer));
-				//Log.d(LCAT, "value:" + bytes);
 				mHandler.obtainMessage(1, buffer).sendToTarget();
 			}
 			catch(IOException e){
 				e.printStackTrace();
+				mConnection.relayError(e.getMessage());
 				try{
 					mSocket.close();
 				}
 				catch(IOException ee){
 					ee.printStackTrace();
+					mConnection.relayError(e.getMessage());
 				}
 			}
 		}
+		// when the thread stops running, stop the message loop!
+		mConnection.stopMessageLoop();
 	}
 	
 	// use in place of deprecated stop method

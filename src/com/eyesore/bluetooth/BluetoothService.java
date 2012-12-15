@@ -1,13 +1,13 @@
 package com.eyesore.bluetooth;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 
 import android.content.BroadcastReceiver;
 import android.content.Intent;
@@ -15,11 +15,8 @@ import android.content.IntentFilter;
 
 import android.app.Service;
 
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Binder;
-import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelUuid;
 
 import android.content.Context;
@@ -30,8 +27,6 @@ import org.appcelerator.kroll.common.TiConfig;
 
 import com.eyesore.bluetooth.BluetoothModule;
 import com.eyesore.bluetooth.BluetoothConnectedThread;
-import com.eyesore.bluetooth.BluetoothServerThread;
-import com.eyesore.bluetooth.BluetoothClientThread;
 import com.eyesore.bluetooth.BluetoothCommonServiceIds;
 
 public class BluetoothService extends Service{
@@ -51,7 +46,6 @@ public class BluetoothService extends Service{
 	 private BluetoothDevice mRemoteDevice;
 	 
 	 private UUID mRemoteServiceUuid;	 
-	 private BluetoothConnectedThread mConnectedThread;
 	 private KrollDict mConnections = new KrollDict();
 	 private String[] mConnectedDevices = new String[10];
 	 private int deviceCounter = 0;
@@ -98,16 +92,9 @@ public class BluetoothService extends Service{
 		}
 	};
 	
-	private final BroadcastReceiver connectionStateReceiver = new BroadcastReceiver(){
-		@Override
-		public void onReceive(Context context, Intent intent){
-			String action = intent.getAction();
-			
-			if(BluetoothDevice.ACTION_ACL_CONNECTED.equals(action))
-				Log.d(LCAT, "Bluetooth device connected.");
-			
-			if(BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action))
-				Log.d(LCAT, "Bluetooth device disconnected.");
+	private final BroadcastReceiver uuidReceiver = new BroadcastReceiver(){
+		public void onReceive(Context context, Intent intenxt){
+			Log.d(LCAT, "Uuid received.");
 		}
 	};
      
@@ -186,19 +173,15 @@ public class BluetoothService extends Service{
 		IntentFilter finishedFilter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
 		mContext.registerReceiver(finishedReceiver, finishedFilter);
 		
-//		IntentFilter connectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_CONNECTED);
-//		mContext.registerReceiver(connectionStateReceiver, connectedFilter);
-//		
-//		IntentFilter disconnectedFilter = new IntentFilter(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-//		mContext.registerReceiver(connectionStateReceiver, disconnectedFilter);
+		IntentFilter uuidFoundFilter = new IntentFilter("android.bluetooth.device.action.UUID");  // BluetoothDevice.ACTION_UUID in API level 15+
+		mContext.registerReceiver(uuidReceiver, uuidFoundFilter);
 	}
 	
 	public void unregisterReceivers(){
 		mContext.unregisterReceiver(foundReceiver);
 		mContext.unregisterReceiver(startedReceiver);
 		mContext.unregisterReceiver(finishedReceiver);
-//		mContext.unregisterReceiver(connectionStateReceiver);
-//		mContext.unregisterReceiver(connectionStateReceiver);
+		mContext.unregisterReceiver(uuidReceiver);
 	}
 	 
 	public void findBluetoothDevices(){			
@@ -226,19 +209,16 @@ public class BluetoothService extends Service{
 	
 	public void stopBluetoothThreads(String deviceAddress)
 	{
-		getConnection(deviceAddress).stopBluetoothThreads();
-	}
-	
-	public void stopMessageLoop(String deviceAddress)
-	{
-		getConnection(deviceAddress).stopMessageLoop();			
+		BluetoothConnection connection = getConnection(deviceAddress);
+		if(connection != null)
+			connection.stopBluetoothThreads();
 	}
 	
 	public void closeAllConnections()
 	{
+		Log.d(LCAT, mConnectedDevices.toString());
 		for(int i = 0; i < mConnectedDevices.length; i++)
 		{
-			stopMessageLoop(mConnectedDevices[i]);
 			stopBluetoothThreads(mConnectedDevices[i]);
 		}
 		
@@ -255,6 +235,11 @@ public class BluetoothService extends Service{
 		mModule.sendError(message);
 	}
 	
+	public void relayMessage(String message)
+	{
+		mModule.sendMessage(message);
+	}
+	
 	public void dataReceived(String source, byte[] data)
 	{
 		mModule.dataReceived(source, data);
@@ -264,9 +249,26 @@ public class BluetoothService extends Service{
 	public void getServiceList(String deviceAddress)
 	{
 		BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);
+		Log.d(LCAT, device.getName());
+		try{
+			String[] services = getServiceDescriptions(servicesFromDevice(device));
+			mModule.servicesFound(services);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			mModule.sendError(e.getMessage());
+		}
+	}
+	
+	// the point of this is to cache the list of services so that they can be retrieved later with getUuids
+	public void startSdp(BluetoothDevice device) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException, ClassNotFoundException
+	{
+		//BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(deviceAddress);
 		
-		String[] services = getServiceDescriptions(servicesFromDevice(device));
-		mModule.servicesFound(services);
+		Class<?> cls = Class.forName("android.bluetooth.BluetoothDevice");
+		java.lang.reflect.Method method = cls.getMethod("fetchUuidsWithSdp", new Class[0]);
+		method.invoke(device);
 	}
 	
 	public void devicePaired(String deviceName)
@@ -277,20 +279,13 @@ public class BluetoothService extends Service{
 	//In SDK15 (4.0.3) this method is now public as
 	//Bluetooth.fetchUuidsWithSdp() and BluetoothDevice.getUuids()
 	// from http://stackoverflow.com/questions/11003280/finding-uuids-in-android-2-0
-	private ParcelUuid[] servicesFromDevice(BluetoothDevice device) 
+	private ParcelUuid[] servicesFromDevice(BluetoothDevice device) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, NoSuchMethodException, ClassNotFoundException
 	{
-	    try {
-	        Class cl = Class.forName("android.bluetooth.BluetoothDevice");
-	        Class[] par = {};
-	        Method method = cl.getMethod("getUuids", par);
-	        Object[] args = {};
-	        ParcelUuid[] retval = (ParcelUuid[]) method.invoke(device, args);
-	        return retval;
-	    } 
-	    catch (Exception e) {
-	        e.printStackTrace();
-	        return null;
-	    }
+		Class<?> cls = Class.forName("android.bluetooth.BluetoothDevice");
+		java.lang.reflect.Method method = cls.getMethod("getUuids", new Class[0]);
+		Log.d(LCAT, method.toGenericString());
+		ParcelUuid[] uuidList = (ParcelUuid[]) method.invoke(device);
+		return uuidList;
 	}
 	
 	private String[] getServiceDescriptions(ParcelUuid[] parcels)
