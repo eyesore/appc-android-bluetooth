@@ -22,6 +22,7 @@ public class BluetoothConnectedThread extends Thread
 	private final Handler mHandler;
 	private final BluetoothSocket mSocket;
 	private final BluetoothConnection mConnection;
+	private final Integer mOutputBuffer;
 	
 	private Boolean running = true;
 	
@@ -31,16 +32,18 @@ public class BluetoothConnectedThread extends Thread
 		mHandler = handler;
 		mSocket = socket;
 		mConnection = connection;
+		mOutputBuffer = mConnection.getOutputBuffer();
 		
 		InputStream tmpIn = null;
 		//OutputStream tmpOut = null;  TODO
 		
 		try {
-			tmpIn = socket.getInputStream();
+			tmpIn = mSocket.getInputStream();
 			//tmpOut = socket.getOutputStream(); TODO
 		}
 		catch(IOException e){
 			e.printStackTrace();
+			running = false;
 			mConnection.relayError(e.getMessage());
 		}
 		
@@ -58,12 +61,13 @@ public class BluetoothConnectedThread extends Thread
 		
 		while(running)
 		{
-			buffer = new byte[1024];
+			buffer = new byte[mOutputBuffer];
 			try{
 				mmInStream.read(buffer);
 				mHandler.obtainMessage(1, buffer).sendToTarget();
 			}
 			catch(IOException e){
+				running = false;
 				e.printStackTrace();
 				mConnection.relayError(e.getMessage());
 				try{

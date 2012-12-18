@@ -1,8 +1,20 @@
 /**
  * This is an example of how one could use this bluetooth module to connect and interact
- * with a device that supports bluetooth.
+ * with a device that supports bluetooth on the Android platform.  The module wraps a service that controls
+ * all functionality.  Only one instance of the service may run at one time, but it can control up to 10 simultaneous
+ * bluetooth connections.
+ * 
+ * Known issues:
+ *  In some cases, a remote device must be paired first through the OS bluetooth settings before being able to connect through
+ *  this module.  This explained here: http://stackoverflow.com/questions/2268365/android-bluetooth-cross-platform-interoperability
  * 
  * The bluetooth module exposes the following methods in javascript:
+ *      startService()
+ *          Start an instance of BluetoothService whose methods below are wrapped by the module.
+ *          It can be stopped with stopService() and started again.  Calling this method while the
+ *          service is running will have no effect.  This method must be called before the module can be used.
+ *          Calling other methods while the service is not running will result in an error.
+ *  
  *      requestEnable()
  *          Request that the android OS enable the bluetooth radio.  If it is already enabled,
  *          a message will be sent in the "bluetooth:message" event saying such, and nothing else will happen.
@@ -13,6 +25,13 @@
  *          "The discovery process usually involves an inquiry scan of about 12 seconds, followed by a page scan 
  *          of each new device to retrieve its Bluetooth name."
  *          Devices found will be returned asynchronously via the "bluetooth:discovery" event.
+ * 
+ *      setOutputBuffer(Integer bytes)
+ *          Set the size of the output buffer.  Default is 1024 bytes.  This is essentially the size of the Titanium.Blob returned in 
+ *          each "bluetooth:data:deviceName" event.  New buffer size applies only to connections made in the future.
+ *          So in order to reconfigure the output buffer of a currently active connection, you would need to disconnect the device, set
+ *          the buffer size, the reconnect.  Ideally this is set once, after starting the service, but it can be configured differently for
+ *          each connection by calling setOutputBuffer(bytes) before calling pairDevice.
  * 
  *      getDeviceServices(deviceName)
  *          String deviceName - The name of the device to query, as returned in the "bluetooth:discovery" event.
@@ -28,9 +47,12 @@
  *          connection on the remote device, or with a PIN, and you will be prompted to do so.  After pairing is complete, data transfer may
  *          begin immediately.
  * 
- *      abortPairing()
- *          Close the remote and local sockets that have been opened for pairing.  If pairing is in process, this will stop it, otherwise it 
+ *      abortPairing(deviceName)
+ *          Close the remote and local sockets that have been opened for pairing for the given device.  If pairing is in process, this will stop it, otherwise it 
  *          won't do anything.
+ * 
+ *      abortConnection(deviceName)  -- not a part of this example
+ *          Close the connection to the given device.
  * 
  *      stopService()
  *          This closes all remote bluetooth connections and stops the bluetooth service (the bluetooth radio will remain on, if it is on).
@@ -82,6 +104,8 @@ var bt = require('com.eyesore.bluetooth');
 // debugging - includes a logging method
 var d = require('tools');
 
+// half the default - calling this method is optional
+bt.setOutputBuffer(512);  
 
 //
 // Tab and window for device output.
@@ -204,6 +228,17 @@ abortPairingButton.addEventListener('click', function(e)
     bt.abortPairing(activeDevice);
 });
 buttonView.add(abortPairingButton);
+
+// start service test
+var startServiceButton = Ti.UI.createButton({
+    title: 'Start Service',
+    height: 70
+});
+startServiceButton.addEventListener('click', function(e)
+{
+    bt.startService();
+});
+buttonView.add(startServiceButton);
 
 // stop service test
 var stopServiceButton = Ti.UI.createButton({
@@ -403,6 +438,8 @@ bt.addEventListener('bluetooth:services', function(e)
  */
 bt.addEventListener('bluetooth:paired', function(e)
 {
+    d.log('Device is paired!');
+    alert('Pairing finished.  Check Output tab...');
     abortPairingButton.hide();
     listenForData(e.device);
 });

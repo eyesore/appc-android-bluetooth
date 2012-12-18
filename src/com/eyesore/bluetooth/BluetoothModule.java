@@ -8,9 +8,6 @@
  */
 package com.eyesore.bluetooth;
 
-import java.util.Collections;
-import java.util.Set;
-
 import org.appcelerator.kroll.KrollModule;
 import org.appcelerator.kroll.annotations.Kroll;
 import org.appcelerator.kroll.KrollDict;
@@ -23,7 +20,6 @@ import org.appcelerator.titanium.TiBlob;
 import android.bluetooth.BluetoothDevice;
 
 import android.os.IBinder;
-import android.os.ParcelUuid;
 
 import android.content.Intent;
 import android.content.Context;
@@ -52,8 +48,8 @@ public class BluetoothModule extends KrollModule
 	private final String DEVICE_PAIRED = "bluetooth:paired";
 	private final String ERROR_EVENT = "bluetooth:error";
 	
-	public static BluetoothService mBluetooth;
-	private static Context mContext;
+	private BluetoothService mBluetooth = null;
+	private final Context mContext;
 	
 	public ComponentName className = new ComponentName("com.eyesore.bluetooth", "BluetoothModule");
 	
@@ -63,38 +59,48 @@ public class BluetoothModule extends KrollModule
 	public BluetoothModule()
 	{
 		super();
-		final BluetoothModule self = this;  // here's to javascript
 		TiApplication appContext = TiApplication.getInstance();
 		Activity currentActivity = appContext.getCurrentActivity();
 		mContext = currentActivity.getBaseContext();
+		startService();
+	}
+
+//	@Kroll.onAppCreate
+//	public static void onAppCreate(TiApplication app)
+//	{
+//		// put module init code that needs to run when the application is created
+//	}
+	
+	@Kroll.method
+	public void startService()
+	{
+		if(mBluetooth != null)
+		{
+			sendMessage("Service is already running.");
+			Log.d(LCAT, "Service is already running.");
+			return;
+		}
 		
+		final BluetoothModule self = this;
 		mBluetooth = new BluetoothService(mContext);
-		
+				
 		Intent i = new Intent(mContext, BluetoothService.class);		
 		
 		mConnection = new ServiceConnection(){
 			@Override
 			public void onServiceConnected(ComponentName className, IBinder binder) {
-				Log.d(LCAT,  "Successfully bound bluetooth service.");
 				mBluetooth.registerReceivers();
 				mBluetooth.setBluetoothModule(self);
 			}
-
+	
 			@Override
 			public void onServiceDisconnected(ComponentName className) {
 				disposeService();
 			}
 		};	
-		
-		Log.d(LCAT,  "About to bind service");
+	
 		mContext.bindService(i, mConnection, Context.BIND_AUTO_CREATE);
-	}
-
-	@Kroll.onAppCreate
-	public static void onAppCreate(TiApplication app)
-	{
-		Log.d(LCAT, "inside onAppCreate");
-		// put module init code that needs to run when the application is created
+		Log.d(LCAT, "Bluetooth service started.");
 	}
 	
 	// Public Methods
@@ -108,10 +114,6 @@ public class BluetoothModule extends KrollModule
 	@Kroll.method
 	public void findDevices()
 	{
-		Log.d(LCAT, "findBluetoothDevices called");
-		
-		// initialize deviceSet to previously bonded devices
-		//mDeviceSet = mBluetooth.findBondedDevices();  // since we can't use devices that aren't in range, for now we'll just make an empty set
 		mBluetooth.findBluetoothDevices();
 	}
 	
@@ -139,8 +141,26 @@ public class BluetoothModule extends KrollModule
 	}
 	
 	@Kroll.method
+	public void abortConnection(String device)
+	{
+		mBluetooth.stopBluetoothThreads(getAddress(device));
+	}
+	
+	@Kroll.method
+	public void setOutputBuffer(Integer bytes)
+	{
+		mBluetooth.setOutputBuffer(bytes);
+	}
+	
+	@Kroll.method
 	public void stopService()
 	{
+		if(mBluetooth == null)
+		{
+			sendMessage("Bluetooth service is not running.");
+			return;
+		}
+		
 		disposeService();
 	}
 	
@@ -210,9 +230,8 @@ public class BluetoothModule extends KrollModule
 		TiBlob blob = TiBlob.blobFromData(data);
 		KrollDict props = new KrollDict();
 		props.put("data", blob);
-		Log.d(LCAT, "Firing event: " + DATA_RECEIVED + source);
+
 		fireEvent(DATA_RECEIVED + source, props);
-		Log.d(LCAT, "Message sent!");
 	}
 	
 	public void devicePaired(String deviceName)

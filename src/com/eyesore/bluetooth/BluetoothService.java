@@ -26,7 +26,6 @@ import org.appcelerator.kroll.common.Log;
 import org.appcelerator.kroll.common.TiConfig;
 
 import com.eyesore.bluetooth.BluetoothModule;
-import com.eyesore.bluetooth.BluetoothConnectedThread;
 import com.eyesore.bluetooth.BluetoothCommonServiceIds;
 
 public class BluetoothService extends Service{
@@ -49,6 +48,7 @@ public class BluetoothService extends Service{
 	 private KrollDict mConnections = new KrollDict();
 	 private String[] mConnectedDevices = new String[10];
 	 private int deviceCounter = 0;
+	 private Integer mOutputBuffer = 1024;
 	 
 	 private final BroadcastReceiver foundReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
@@ -94,7 +94,7 @@ public class BluetoothService extends Service{
 	
 	private final BroadcastReceiver uuidReceiver = new BroadcastReceiver(){
 		public void onReceive(Context context, Intent intenxt){
-			Log.d(LCAT, "Uuid received.");
+			
 		}
 	};
      
@@ -110,7 +110,6 @@ public class BluetoothService extends Service{
      // associate the service with the titanium module that called it.
      public void setBluetoothModule(BluetoothModule module)
      {
-    	 Log.d(LCAT, "setting module");
     	 mModule = module;
      }
      
@@ -138,6 +137,16 @@ public class BluetoothService extends Service{
      public UUID getServiceUuid()
      {
     	 return mRemoteServiceUuid;
+     }
+     
+     public Integer getOutputBuffer()
+     {
+    	 return mOutputBuffer;
+     }
+     
+     public void setOutputBuffer(Integer bytes)
+     {
+    	 mOutputBuffer = bytes;
      }
 	 
 	 public void connectBluetooth()
@@ -198,9 +207,6 @@ public class BluetoothService extends Service{
 	{
 		BluetoothDevice remoteDevice = mBluetoothAdapter.getRemoteDevice(remoteAddress);
 		BluetoothServiceId serviceId = BluetoothCommonServiceIds.getByDescription(serviceName);
-		Log.d(LCAT, "UUID of selected service");
-		Log.d(LCAT, serviceId.toString());
-		Log.d(LCAT, "Attempting to pair with device: " + remoteDevice.toString());
 		
 		// Store reference to connection keyed on remote Address - TODO key off device name?
 		mConnections.put(remoteAddress, new BluetoothConnection(this, remoteDevice, serviceId));
@@ -228,6 +234,12 @@ public class BluetoothService extends Service{
 	public void abortPairing(String deviceAddress)
 	{
 		getConnection(deviceAddress).abortPairing();
+	}
+	
+	public void abortConnection(String deviceAddress)
+	{
+		stopBluetoothThreads(mConnections.getString(deviceAddress));
+		mConnections.remove(deviceAddress);
 	}
 	
 	public void relayError(String message)
@@ -283,7 +295,6 @@ public class BluetoothService extends Service{
 	{
 		Class<?> cls = Class.forName("android.bluetooth.BluetoothDevice");
 		java.lang.reflect.Method method = cls.getMethod("getUuids", new Class[0]);
-		Log.d(LCAT, method.toGenericString());
 		ParcelUuid[] uuidList = (ParcelUuid[]) method.invoke(device);
 		return uuidList;
 	}

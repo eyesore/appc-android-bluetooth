@@ -25,6 +25,7 @@ class BluetoothConnection extends Object
 	private BluetoothSocket mClientSocket;
 	private Handler mHandler;
 	private BluetoothConnectedThread mConnected;
+	private final Integer mOutputBuffer;
 	
 	// TODO more generic handler - don't convert to string, return data directly
 	private Handler.Callback mCallback;
@@ -39,6 +40,8 @@ class BluetoothConnection extends Object
 		mBluetooth = service;
 		mDevice = device;
 		mServiceId = serviceId;
+		
+		mOutputBuffer = mBluetooth.getOutputBuffer();
 		
 		mCallback = new Handler.Callback() {		
 			@Override
@@ -70,7 +73,7 @@ class BluetoothConnection extends Object
 		if(mClientSocket != null)
 			connect();
 		else
-			Log.d(LCAT, "Got client socket, but server socket is null.");
+			Log.d(LCAT, "Client socket is null.");
 	}
 	
 	public BluetoothServiceId getServiceId()
@@ -88,9 +91,15 @@ class BluetoothConnection extends Object
 		return mDevice;
 	}
 	
+	public Integer getOutputBuffer()
+	{
+		return mOutputBuffer;
+	}
+	
 	public void abortPairing()
 	{
 		mServerThread.abortPairing();
+		mClientThread.abortConnection();
 	}
 	
 	public void relayError(String message)
@@ -122,11 +131,10 @@ class BluetoothConnection extends Object
 	
 	private void connect()
 	{
-		mBluetooth.devicePaired(mDevice.getName());
-		
 		Looper.prepare();
 		mHandler = new Handler(mCallback);
 		mConnected = new BluetoothConnectedThread(this, mClientSocket, mHandler);
+		mBluetooth.devicePaired(mDevice.getName());
 		Looper.loop();
 	}
 }

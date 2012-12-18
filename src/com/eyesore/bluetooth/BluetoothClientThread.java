@@ -27,15 +27,21 @@ public class BluetoothClientThread extends Thread
 		 Log.d(LCAT, "Creating new Client thread.");
 		 mConnection = connection;
 		 mDevice = connection.getDevice();
-		 try{
+		 try{		 
+//			 // using reflection in an effort to make it work - no different from calling createRfcommSocketToServiceRecord directly
+//			 Class<?> cls = Class.forName("android.bluetooth.BluetoothDevice");
+//			 Class<?> arg = Class.forName("java.util.UUID");
+//			 java.lang.reflect.Method method = cls.getMethod("createRfcommSocketToServiceRecord", new Class[]{arg});
+//			 mSocket = (BluetoothSocket) method.invoke(mDevice, mConnection.getServiceId().mUuid);
+			 
 			 mSocket = mDevice.createRfcommSocketToServiceRecord(mConnection.getServiceId().mUuid);
+			 start();
 		 }
-		 catch(IOException e){
+		 catch(Exception e){
+			 mConnection.abortPairing();
 			 e.printStackTrace();
 			 mConnection.relayError(e.getMessage());
 		 }
-		 
-		 start();
 	 }
 	 
 	 @Override

@@ -34,12 +34,13 @@ public class BluetoothServerThread extends Thread
 		
 		try {
 	   		 mServerSocket = mBluetoothAdapter.listenUsingRfcommWithServiceRecord("com.eyesore.bluetooth.BluetoothService", mConnection.getServiceId().mUuid);
+	   		 start();
 	   	 }
 	   	 catch(IOException e){
+	   		 mConnection.abortPairing();
 	   		 e.printStackTrace();
 	   		 mConnection.relayError(e.getMessage());
 	   	 }
-		start();
 	}
 	
 	@Override
