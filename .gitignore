@@ -2,6 +2,7 @@ tmp
 bin
 build
 dist
+libs
 *.zip
 .apt_generated
 .DS_Store

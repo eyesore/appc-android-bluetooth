@@ -26,6 +26,8 @@ class BluetoothConnection extends Object
 	private Handler mHandler;
 	private BluetoothConnectedThread mConnected;
 	private final Integer mOutputBuffer;
+	private final Integer mInputBuffer;
+	private final Integer mReadSize;
 	
 	// TODO more generic handler - don't convert to string, return data directly
 	private Handler.Callback mCallback;
@@ -42,6 +44,8 @@ class BluetoothConnection extends Object
 		mServiceId = serviceId;
 		
 		mOutputBuffer = mBluetooth.getOutputBuffer();
+		mInputBuffer = mBluetooth.getInputBuffer();
+		mReadSize = mBluetooth.getReadSize();
 		
 		mCallback = new Handler.Callback() {		
 			@Override
@@ -94,6 +98,21 @@ class BluetoothConnection extends Object
 	public Integer getOutputBuffer()
 	{
 		return mOutputBuffer;
+	}
+	
+	public Integer getInputBuffer()
+	{
+		return mInputBuffer;
+	}
+	
+	public Integer getReadSize()
+	{
+		return mReadSize;
+	}
+	
+	public void write(byte[] data)
+	{
+		mConnected.write(data);
 	}
 	
 	public void abortPairing()

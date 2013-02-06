@@ -37,7 +37,6 @@ public class BluetoothServerThread extends Thread
 	   		 start();
 	   	 }
 	   	 catch(IOException e){
-	   		 mConnection.abortPairing();
 	   		 e.printStackTrace();
 	   		 mConnection.relayError(e.getMessage());
 	   	 }
@@ -91,6 +90,7 @@ public class BluetoothServerThread extends Thread
 	
 	private void handleSocket(BluetoothSocket socket)
 	{
+		mConnection.setServerSocket(socket);
 		// always close the serversocket after socket is established
 		try{
 			mServerSocket.close();
@@ -99,7 +99,5 @@ public class BluetoothServerThread extends Thread
 			e.printStackTrace();
 			mConnection.relayError(e.getMessage());
 		}
-		
-		mConnection.setServerSocket(socket);
 	}	
 }

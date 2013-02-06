@@ -48,7 +48,9 @@ public class BluetoothService extends Service{
 	 private KrollDict mConnections = new KrollDict();
 	 private String[] mConnectedDevices = new String[10];
 	 private int deviceCounter = 0;
-	 private Integer mOutputBuffer = 1024;
+	 private Integer mOutputBuffer = 8192;
+	 private Integer mInputBuffer = 8192;
+	 private Integer mReadSize = 1024;
 	 
 	 private final BroadcastReceiver foundReceiver = new BroadcastReceiver() {
 	    public void onReceive(Context context, Intent intent) {
@@ -144,9 +146,29 @@ public class BluetoothService extends Service{
     	 return mOutputBuffer;
      }
      
+     public Integer getInputBuffer()
+     {
+    	 return mInputBuffer;
+     }
+     
+     public Integer getReadSize()
+     {
+    	 return mReadSize;
+     }
+     
      public void setOutputBuffer(Integer bytes)
      {
     	 mOutputBuffer = bytes;
+     }
+     
+     public void setInputBuffer(Integer bytes)
+     {
+    	 mInputBuffer = bytes;
+     }
+     
+     public void setReadSize(Integer bytes)
+     {
+    	 mReadSize = bytes;
      }
 	 
 	 public void connectBluetooth()
@@ -170,6 +192,11 @@ public class BluetoothService extends Service{
 			
 			mContext.startActivity(intentBluetooth);
 		}	
+	}
+	 
+	public Boolean isEnabled()
+	{
+		return mBluetoothAdapter.isEnabled();
 	}
 	 
 	public void registerReceivers(){
@@ -211,6 +238,13 @@ public class BluetoothService extends Service{
 		// Store reference to connection keyed on remote Address - TODO key off device name?
 		mConnections.put(remoteAddress, new BluetoothConnection(this, remoteDevice, serviceId));
 		addConnectedDevice(remoteAddress);
+	}
+	
+	public void write(String deviceAddress, byte[] data)
+	{
+		BluetoothConnection connection = getConnection(deviceAddress);
+		if(connection != null)
+			connection.write(data);
 	}
 	
 	public void stopBluetoothThreads(String deviceAddress)
