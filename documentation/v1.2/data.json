@@ -1,0 +1,445 @@
+{
+    "project": {},
+    "files": {
+        "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java": {
+            "name": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "modules": {},
+            "classes": {
+                "BluetoothModule": 1
+            },
+            "fors": {},
+            "namespaces": {}
+        }
+    },
+    "modules": {},
+    "classes": {
+        "BluetoothModule": {
+            "name": "BluetoothModule",
+            "shortname": "BluetoothModule",
+            "classitems": [],
+            "plugins": [],
+            "extensions": [],
+            "plugin_for": [],
+            "extension_for": [],
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 71,
+            "is_constructor": 1,
+            "return": {
+                "description": "The bluetooth namespace.",
+                "type": "BluetoothModule"
+            }
+        }
+    },
+    "classitems": [
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 91,
+            "description": "Fires when the module activity is destroyed.  Receives the native android onDestroy event.\nBe sure to understand the android activity lifecycle before attempting to use.\nSee http://developer.android.com/reference/android/app/Activity.html",
+            "itemtype": "event",
+            "name": "bluetooth:destroy",
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 108,
+            "description": "Fires when the native android onStart event is received by the module.\nBe sure to understand the android activity lifecycle before attempting to use.\nSee http://developer.android.com/reference/android/app/Activity.html",
+            "itemtype": "event",
+            "name": "bluetooth:start",
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 122,
+            "description": "Fires when the native android onStop event is received by the module.\nBe sure to understand the android activity lifecycle before attempting to use.\nSee http://developer.android.com/reference/android/app/Activity.html",
+            "itemtype": "event",
+            "name": "bluetooth:stop",
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 136,
+            "description": "Fires when the native android onPause event is received by the module.\nBe sure to understand the android activity lifecycle before attempting to use.\nSee http://developer.android.com/reference/android/app/Activity.html",
+            "itemtype": "event",
+            "name": "bluetooth:pause",
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 150,
+            "description": "Fires when the native android onResume event is received by the module.\nBe sure to understand the android activity lifecycle before attempting to use.\nSee http://developer.android.com/reference/android/app/Activity.html",
+            "itemtype": "event",
+            "name": "bluetooth:resume",
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 164,
+            "description": "Start the bluetooth service controlled by the module.  This is called by the constructor, so it shouldn't be\nnecessary to call it unless the service is stopped manually.  It is safe to call this method while the service\nis running.  In that case, it will have no effect.  Calling any other methods while the service is not running\nwill result in an error.",
+            "itemtype": "method",
+            "name": "startService",
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 205,
+            "description": "Request that the Android OS enable the device's bluetooth radio (if one exists).  A message will be sent back via\nthe \"bluetooth:message\" event regarding the status of the request.  Safe to call if bluetooth is already enabled.\nIf not, the user will be prompted to allow bluetooth to be enabled.",
+            "itemtype": "method",
+            "name": "requestEnable",
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 221,
+            "description": "Check if the device's bluetooth adapter is enabled.",
+            "itemtype": "method",
+            "name": "isEnabled",
+            "return": {
+                "description": "Boolean"
+            },
+            "since": "1.1",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 233,
+            "description": "Check if the device has a bluetooth adapter.",
+            "itemtype": "method",
+            "name": "isSupported",
+            "return": {
+                "description": "Boolean"
+            },
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 245,
+            "description": "Start the remote device discovery process.  From android developer reference:\n\"The discovery process usually involves an inquiry scan of about 12 seconds, followed by a page scan\nof each new device to retrieve its Bluetooth name.\"\nDevices found will be returned asynchronously via the \"bluetooth:discovery\" event.",
+            "itemtype": "method",
+            "name": "findDevices",
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 261,
+            "description": "Retrieve the names of services that the remote device may use to connect.  These are returned asynchronously\nvia the \"bluetooth:services\" event.  You must pass the name of a service that the remote device supports in order to\npair with it.  Unless there is a particular service that you need to connect to, you will probably have the most\nsuccess just using \"Serial Port\".",
+            "itemtype": "method",
+            "name": "getDeviceServices",
+            "params": [
+                {
+                    "name": "deviceName",
+                    "description": "The name of the device to query, as returned in the \"bluetooth:discovery\" event.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 278,
+            "description": "Initiate a connection to the remote device on the specified channel.  In some cases you must confirm this\nconnection on the remote device, or with a PIN, and you will be prompted to do so.  After pairing is complete, data transfer may\nbegin immediately.  The event \"bluetooth:paired\" is fired when pairing has completed successfully.",
+            "itemtype": "method",
+            "name": "pairDevice",
+            "params": [
+                {
+                    "name": "deviceName",
+                    "description": "The name of the device with which to pair, as returned in the \"bluetooth:discovery\" event.",
+                    "type": "String"
+                },
+                {
+                    "name": "serviceName",
+                    "description": "The name of the remote service (channel) to connect to as returned in the \"bluetooth:services\" event.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 295,
+            "description": "Connect to the bluetooth serial-port-like service without need for querying device services.  \nThis should work for most devices.",
+            "itemtype": "method",
+            "name": "quickPair",
+            "params": [
+                {
+                    "name": "deviceName",
+                    "description": "The name of the device with which to pair, as returned in the \"bluetooth:discovery\" event.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 309,
+            "description": "Close the remote and local sockets that have been opened for pairing for the given device.  If pairing is in process, this will \nstop it, otherwise it won't do anything. This should be implemented in a setTimeout (or similar) in the application\nto prevent the BluetoothServerSocket.accept() call to continue indefinitely, which would rapidly drain device power.",
+            "itemtype": "method",
+            "name": "abortPairing",
+            "params": [
+                {
+                    "name": "device",
+                    "description": "The name of the device with which to terminate pairing, as returned in the \"bluetooth:discovery\" event.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 325,
+            "description": "Close an open data connection to the given device (after pairing has finished).  This will cause the device to be disconnected.",
+            "itemtype": "method",
+            "name": "abortConnection",
+            "params": [
+                {
+                    "name": "device",
+                    "description": "The name of the device with which to terminate the connection, as returned in the \"bluetooth:discovery\" event.",
+                    "type": "String"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 339,
+            "description": "Optionally set the size of the output buffer.  Default is 8192 bytes.  Outgoing data will be added to \nthe buffer until full, then the buffer will be flushed.",
+            "itemtype": "method",
+            "name": "setOutputBuffer",
+            "params": [
+                {
+                    "name": "bytes",
+                    "description": "Size of the output buffer in bytes.  Defaults to 8192.",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.1",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 353,
+            "description": "Optionally set the size of the input buffer.  Default is 8192 bytes.  Incoming data will be added to \nthe buffer until full, then the buffer will be flushed.",
+            "itemtype": "method",
+            "name": "setInputBuffer",
+            "params": [
+                {
+                    "name": "bytes",
+                    "description": "Size of the input buffer in bytes.  Defaults to 8192 bytes.",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.1",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 367,
+            "description": "Optionally set the size of the output buffer.  Default is 1024 bytes.  This is the maximum size of the Titanium.Blob returned in\neach \"bluetooth:data:deviceName\" event.  New buffer size applies only to connections made in the future.\nSo in order to reconfigure the output buffer of a currently active connection, you would need to disconnect the device, set\nthe buffer size, then reconnect.  Ideally this is set once, after starting the service, but it can be configured differently for\neach connection by calling setReadSize(bytes) before calling pairDevice.",
+            "itemtype": "method",
+            "name": "setReadSize",
+            "params": [
+                {
+                    "name": "bytes",
+                    "description": "Max size of data returned in each \"data\" event.  Defaults to 1024 bytes.",
+                    "type": "Number"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.1",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 384,
+            "description": "Optionally set whether the bluetooth service is stopped automatiacally when the module activity is destroyed.\nDefault it true;",
+            "itemtype": "method",
+            "name": "setKillOnDestroy",
+            "params": [
+                {
+                    "name": "b",
+                    "description": "True or false"
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.2",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 398,
+            "description": "Manually stop the bluetooth service.  If you don't call this when your app exits, the service will continue running in the background!",
+            "itemtype": "method",
+            "name": "stopService",
+            "return": {
+                "description": "void"
+            },
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 417,
+            "description": "Send raw data to a connected device.",
+            "itemtype": "method",
+            "name": "write",
+            "params": [
+                {
+                    "name": "deviceName",
+                    "description": "Name of the remote device."
+                },
+                {
+                    "name": "data",
+                    "description": "Raw data to send."
+                }
+            ],
+            "return": {
+                "description": "void"
+            },
+            "since": "1.1",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 456,
+            "itemtype": "event",
+            "name": "bluetooth:discovery",
+            "params": [
+                {
+                    "name": "devices",
+                    "description": "Keys are device names and values are hardware addresses.  Currently, only the name is used by this module.",
+                    "type": "Object"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 491,
+            "description": "NB. When queried by the service discovery protocol, devices return the UUIDs of services that they claim to support.\nFor the sake of human readability, these UUIDs have been mapped to names/descriptions, which is what this module uses to\ndesignate a service with which to connect.  The names should not necessarily be relied upon as accurate.  If you need to know\nthe UUID, the mapping comes from here:\nhttp://bluetooth-pentest.narod.ru/doc/assigned_numbers_-_service_discovery.html",
+            "itemtype": "event",
+            "name": "bluetooth:services",
+            "params": [
+                {
+                    "name": "services",
+                    "description": "Array of the names of services that the device claims to support.",
+                    "type": "Array"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 510,
+            "description": "Transmits a package of data from the remote device to the host device.  Once a connection is established you should begin listening\nfor this event.  The event name includes the name of the device in place of \"deviceName\".",
+            "itemtype": "event",
+            "name": "bluetooth:data:deviceName",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "Binary data transmitted from the remote device.",
+                    "type": "Titanium.Blob"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 527,
+            "description": "Fires after successfully pairing with device.",
+            "itemtype": "event",
+            "name": "bluetooth:paired",
+            "params": [
+                {
+                    "name": "device",
+                    "description": "The name of the device that is now paired.",
+                    "type": "String"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 542,
+            "description": "Occasionally the module will have something to say.  Listen for it on this event.",
+            "itemtype": "event",
+            "name": "bluetooth:message",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "A message from the bluetooth module.",
+                    "type": "String"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        },
+        {
+            "file": "/media/sf_VmShare/Code/appcelerator_doc_files/bluetooth/BluetoothModule.java",
+            "line": 557,
+            "description": "Identical to bluetooth:message, but more or less important, depending on your perspective.",
+            "itemtype": "event",
+            "name": "bluetooth:error",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "Something's gone terribly wrong.",
+                    "type": "String"
+                }
+            ],
+            "since": "1.0",
+            "class": "BluetoothModule"
+        }
+    ],
+    "warnings": []
+}

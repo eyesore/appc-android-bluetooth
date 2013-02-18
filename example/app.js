@@ -19,20 +19,19 @@ Titanium.UI.setBackgroundColor('#000');
 // create tab group
 var tabGroup = Titanium.UI.createTabGroup();
 
-// in this example we will listen for 'destroy' on this activity, to stop the bluetooth service
-var mainActivity;
-
 // require the bluetooth module
 // the constructor creates and binds a new android service with various bluetooth capabilities.
 var bt = require('com.eyesore.bluetooth');
-// set buffer sizes for all connections - optional
+// set buffer sizes (in bytes) for all connections - optional
 bt.setInputBuffer(4096);  // defaults to 8192
 bt.setOutputBuffer(4096); // defaults to 8192
 bt.setReadSize(512); // defaults to 1024
 
+// Uncomment to allow the bluetooth service to continue running in the background after your app closes.
+// bt.setKillOnDestroy(false);
+
 // debugging - includes a logging method
 var d = require('tools');
-d.log(bt);
 
 // activity indicator
 var activityIndicator = Ti.UI.createActivityIndicator({
@@ -257,6 +256,20 @@ var manageWinSize = function()
     }
 };
 
+var newButtonBox = function(deviceName)
+{
+    var view = Ti.UI.createView({
+        width: '80%',
+        height: 50,
+        top: 5,
+        layout: 'horizontal'
+    });
+    
+    view.add(newDeviceButton(deviceName));
+    view.add(newQuickPairButton(deviceName));
+    return view;
+};
+
 /**
  * @param {String} deviceName
  * @return {Ti.UI.button}  Button with a 'click' listener to get the supported services from the selected device.
@@ -288,6 +301,24 @@ var newDeviceButton = function(deviceName)
         bt.getDeviceServices(activeDevice);
     });
 
+    return button;
+};
+
+var newQuickPairButton = function(deviceName)
+{
+    var button = Ti.UI.createButton({
+        title: 'Quick Pair',
+        height: 50,
+        width: '15%',
+        left: 10
+    });
+    
+    button.addEventListener('click', function(e)
+    {
+        activeDevice = deviceName;
+        bt.quickPair(deviceName);
+    });
+    
     return button;
 };
 
@@ -399,7 +430,7 @@ bt.addEventListener('bluetooth:discovery', function(e)
 
     var device;
     for(device in e.devices)
-        deviceView.add(newDeviceButton(device));
+        deviceView.add(newButtonBox(device));
 });
 
 /**
@@ -434,18 +465,35 @@ bt.addEventListener('bluetooth:paired', function(e)
     listenForData(e.device);
 });
 
-// dirty way of making sure the service stops when the app closes
-win1.addEventListener('open', function(e)
+// new 1.3 events
+// see log to find out when these events fire
+// also see http://developer.android.com/reference/android/app/Activity.html
+var broadcastEvent = function(eventName)
 {
-    mainActivity = e.source.activity;
-    mainActivity.addEventListener('destroy', function(e)
-    {
-        d.log('Destroyed activity.');
-        d.log(e);
-        bt.stopService();
-    });
+    d.log('Firing event: ' + eventName);
+};
+bt.addEventListener('bluetooth:resume', function(e)
+{
+    broadcastEvent('Resume');
+});
+bt.addEventListener('bluetooth:pause', function(e)
+{
+    broadcastEvent('Pause');
+});
+bt.addEventListener('bluetooth:start', function(e)
+{
+    broadcastEvent('Start');
+});
+bt.addEventListener('bluetooth:stop', function(e)
+{
+   broadcastEvent('Stop'); 
+});
+bt.addEventListener('bluetooth:destroy', function(e)
+{
+    broadcastEvent('Destroy');
 });
 
+// Go!
 tabGroup.addTab(tab1);
 tabGroup.addTab(tab2);
 tabGroup.open();

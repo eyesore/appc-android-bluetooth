@@ -1,8 +1,6 @@
 package com.eyesore.bluetooth;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.Set;
 import java.util.UUID;
 
@@ -198,6 +196,11 @@ public class BluetoothService extends Service{
 	{
 		return mBluetoothAdapter.isEnabled();
 	}
+	
+	public Boolean isSupported()
+	{
+		return mBluetoothAdapter != null;
+	}
 	 
 	public void registerReceivers(){
 		IntentFilter foundFilter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
@@ -256,7 +259,6 @@ public class BluetoothService extends Service{
 	
 	public void closeAllConnections()
 	{
-		Log.d(LCAT, mConnectedDevices.toString());
 		for(int i = 0; i < mConnectedDevices.length; i++)
 		{
 			stopBluetoothThreads(mConnectedDevices[i]);

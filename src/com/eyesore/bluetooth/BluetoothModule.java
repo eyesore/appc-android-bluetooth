@@ -47,6 +47,11 @@ public class BluetoothModule extends KrollModule
 	private final String MESSAGE_EVENT = "bluetooth:message";
 	private final String DEVICE_PAIRED = "bluetooth:paired";
 	private final String ERROR_EVENT = "bluetooth:error";
+	private final String APP_DESTROY = "bluetooth:destroy";
+	private final String APP_START = "bluetooth:start";
+	private final String APP_STOP = "bluetooth:stop";
+	private final String APP_PAUSE = "bluetooth:pause";
+	private final String APP_RESUME = "bluetooth:resume";
 	
 	private BluetoothService mBluetooth = null;
 	private final Context mContext;
@@ -55,6 +60,13 @@ public class BluetoothModule extends KrollModule
 	
 	private ServiceConnection mConnection;
 	private KrollDict mDevices;
+	
+	// by default, stop the bluetooth service when the app exits
+	private Boolean KillOnDestroy = true;
+	
+	//  CONSTANTS EXPOSED PUBLICLY
+//	@Kroll.constant
+//	public static final int IOEXCEPTION = 1;
 	
 	/**
 	 * @class BluetoothModule
@@ -75,6 +87,79 @@ public class BluetoothModule extends KrollModule
 //	{
 //		// put module init code that needs to run when the application is created
 //	}
+	
+	/**
+	 * Fires when the module activity is destroyed.  Receives the native android onDestroy event.
+	 * Be sure to understand the android activity lifecycle before attempting to use.
+	 * See http://developer.android.com/reference/android/app/Activity.html
+	 * @event bluetooth:destroy 
+	 * @since 1.2
+	 */
+	@Override
+	public void onDestroy(Activity activity)
+	{
+		Log.d(LCAT, "Received native destroy event.");
+		fireEvent(APP_DESTROY, new KrollDict());
+		
+		if(KillOnDestroy)
+			stopService();
+	}
+	
+	/**
+	 * Fires when the native android onStart event is received by the module.
+	 * Be sure to understand the android activity lifecycle before attempting to use.
+	 * See http://developer.android.com/reference/android/app/Activity.html
+	 * @event bluetooth:start 
+	 * @since 1.2
+	 */
+	@Override
+	public void onStart(Activity activity)
+	{
+		Log.d(LCAT, "Received native start event.");
+		fireEvent(APP_START, new KrollDict());
+	}
+	
+	/**
+	 * Fires when the native android onStop event is received by the module.
+	 * Be sure to understand the android activity lifecycle before attempting to use.
+	 * See http://developer.android.com/reference/android/app/Activity.html
+	 * @event bluetooth:stop
+	 * @since 1.2
+	 */
+	@Override
+	public void onStop(Activity activity)
+	{
+		Log.d(LCAT, "Received native stop event.");
+		fireEvent(APP_STOP, new KrollDict());
+	}
+	
+	/**
+	 * Fires when the native android onPause event is received by the module.
+	 * Be sure to understand the android activity lifecycle before attempting to use.
+	 * See http://developer.android.com/reference/android/app/Activity.html
+	 * @event bluetooth:pause 
+	 * @since 1.2
+	 */
+	@Override
+	public void onPause(Activity activity)
+	{
+		Log.d(LCAT, "Received native pause event.");
+		fireEvent(APP_PAUSE, new KrollDict());
+	}
+	
+	/**
+	 * Fires when the native android onResume event is received by the module.
+	 * Be sure to understand the android activity lifecycle before attempting to use.
+	 * See http://developer.android.com/reference/android/app/Activity.html
+	 * @event bluetooth:resume 
+	 * @since 1.2
+	 */
+	@Override
+	public void onResume(Activity activity)
+	{
+		Log.d(LCAT, "Received native resume event.");
+		fireEvent(APP_RESUME, new KrollDict());
+	}
 	
 	/**
 	 * Start the bluetooth service controlled by the module.  This is called by the constructor, so it shouldn't be
@@ -146,6 +231,18 @@ public class BluetoothModule extends KrollModule
 	}
 	
 	/**
+	 * Check if the device has a bluetooth adapter.
+	 * @method isSupported
+	 * @return Boolean
+	 * @since 1.2
+	 */
+	@Kroll.method
+	public Boolean isSupported()
+	{
+		return mBluetooth.isSupported();
+	}
+	
+	/**
 	 * Start the remote device discovery process.  From android developer reference:
 	 * "The discovery process usually involves an inquiry scan of about 12 seconds, followed by a page scan
 	 * of each new device to retrieve its Bluetooth name."
@@ -193,6 +290,20 @@ public class BluetoothModule extends KrollModule
 	public void pairDevice(String deviceName, String serviceName)
 	{
 		mBluetooth.attemptConnection(getAddress(deviceName), serviceName);
+	}
+	
+	/**
+	 * Connect to the bluetooth serial-port-like service without need for querying device services.  
+	 * This should work for most devices.
+	 * @method quickPair
+	 * @param deviceName {string} The name of the device with which to pair, as returned in the "bluetooth:discovery" event.
+	 * @return void
+	 * @since 1.2
+	 */
+	@Kroll.method
+	public void quickPair(String deviceName)
+	{
+		pairDevice(deviceName, "SerialPort");
 	}
 	
 	/**
@@ -268,6 +379,20 @@ public class BluetoothModule extends KrollModule
 	public void setReadSize(Integer bytes)
 	{
 		mBluetooth.setReadSize(bytes);
+	}
+	
+	/**
+	 * Optionally set whether the bluetooth service is stopped automatiacally when the module activity is destroyed.
+	 * Default it true;
+	 * @method setKillOnDestroy
+	 * @param b True or false
+	 * @return void
+	 * @since 1.2
+	 */
+	@Kroll.setProperty
+	public void setKillOnDestroy(Boolean b)
+	{
+		KillOnDestroy = b;
 	}
 	
 	/**
