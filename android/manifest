@@ -1,0 +1,17 @@
+#
+# this is your module manifest and used by Titanium
+# during compilation, packaging, distribution, etc.
+#
+version: 1.0.0
+apiversion: 2
+description: bluetooth
+author: Trey Jones
+license: Specify your license
+copyright: Copyright (c) 2014 by Your Company
+
+# these should not be edited
+name: bluetooth
+moduleid: com.eyesoreinc.bluetooth
+guid: 06913ba9-8d40-4b93-91e8-2ce6364f73cc
+platform: android
+minsdk: 3.3.0.GA

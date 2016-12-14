@@ -21,7 +21,7 @@ var tabGroup = Titanium.UI.createTabGroup();
 
 // require the bluetooth module
 // the constructor creates and binds a new android service with various bluetooth capabilities.
-var bt = require('com.eyesore.bluetooth');
+var bt = require('com.eyesoreinc.bluetooth');
 // set buffer sizes (in bytes) for all connections - optional
 bt.setInputBuffer(4096);  // defaults to 8192
 bt.setOutputBuffer(4096); // defaults to 8192
@@ -29,9 +29,6 @@ bt.setReadSize(512); // defaults to 1024
 
 // Uncomment to allow the bluetooth service to continue running in the background after your app closes.
 // bt.setKillOnDestroy(false);
-
-// debugging - includes a logging method
-var d = require('tools');
 
 // activity indicator
 var activityIndicator = Ti.UI.createActivityIndicator({
@@ -205,7 +202,7 @@ writeButton.addEventListener('click', function(e)
     var filePath = Ti.Filesystem.resourcesDirectory + '/assets/test.txt',
         file = Ti.Filesystem.getFile(filePath),
         data = file.read();
-    
+
     streamData(data);
     //bt.write(activeDevice, data);
 });
@@ -226,7 +223,7 @@ var streamData = function(data)
         source: data
         }),
         buffer = Ti.createBuffer({ length: 2048});
-        
+
     while( blobStream.read(buffer) > -1)
     {
         bt.write(activeDevice, buffer.toBlob());
@@ -264,7 +261,7 @@ var newButtonBox = function(deviceName)
         top: 5,
         layout: 'horizontal'
     });
-    
+
     view.add(newDeviceButton(deviceName));
     view.add(newQuickPairButton(deviceName));
     return view;
@@ -312,13 +309,13 @@ var newQuickPairButton = function(deviceName)
         width: '15%',
         left: 10
     });
-    
+
     button.addEventListener('click', function(e)
     {
         activeDevice = deviceName;
         bt.quickPair(deviceName);
     });
-    
+
     return button;
 };
 
@@ -364,12 +361,12 @@ var listenForData = function(deviceName)
      *
      * e.data is device of type Titanium.Blob
      */
-    d.log('Listener:');
-    d.log('bluetooth:data:' + deviceName);
+    console.log('Listener:');
+    console.log('bluetooth:data:' + deviceName);
     bt.addEventListener('bluetooth:data:' + deviceName, function(e)
     {
-        d.log('Data received:');
-        d.log(e.data);
+        console.log('Data received:');
+        console.log(e.data);
         // just dump the data into the container as an example
         // chances are you want to do something a little bit more sophisticated!
         dataView.add(Ti.UI.createLabel({
@@ -386,7 +383,7 @@ var listenForData = function(deviceName)
  */
 bt.addEventListener('bluetooth:message', function(e)
 {
-    d.log(e.message);
+    console.log(e.message);
 });
 
 /**
@@ -396,9 +393,9 @@ bt.addEventListener('bluetooth:message', function(e)
 var errorHandler = function(e)
 {
     Ti.API.error('Error in bluetooth module: ');
-    d.log(e.message);
+    console.log(e.message);
     alert(e.message);
-    
+
     // prevent alert spam
     bt.removeEventListener('bluetooth:error', errorHandler);
     setTimeout(function()
@@ -417,7 +414,7 @@ bt.addEventListener('bluetooth:discovery', function(e)
 {
     activityIndicator.hide();
     // device names are returned in this variable - see log output
-    d.log(e.devices);
+    console.log(e.devices);
 
     // clear old device data
     removeChildren(deviceView);
@@ -441,7 +438,7 @@ bt.addEventListener('bluetooth:discovery', function(e)
  */
 bt.addEventListener('bluetooth:services', function(e)
 {
-    d.log(e.services);
+    console.log(e.services);
 
     removeChildren(servicesView);
     servicesView.add(Ti.UI.createLabel({
@@ -459,7 +456,7 @@ bt.addEventListener('bluetooth:services', function(e)
  */
 bt.addEventListener('bluetooth:paired', function(e)
 {
-    d.log('Device is paired!');
+    console.log('Device is paired!');
     alert('Pairing finished.  Check Output tab...');
     abortPairingButton.hide();
     listenForData(e.device);
@@ -470,7 +467,7 @@ bt.addEventListener('bluetooth:paired', function(e)
 // also see http://developer.android.com/reference/android/app/Activity.html
 var broadcastEvent = function(eventName)
 {
-    d.log('Firing event: ' + eventName);
+    console.log('Firing event: ' + eventName);
 };
 bt.addEventListener('bluetooth:resume', function(e)
 {
@@ -486,7 +483,7 @@ bt.addEventListener('bluetooth:start', function(e)
 });
 bt.addEventListener('bluetooth:stop', function(e)
 {
-   broadcastEvent('Stop'); 
+   broadcastEvent('Stop');
 });
 bt.addEventListener('bluetooth:destroy', function(e)
 {

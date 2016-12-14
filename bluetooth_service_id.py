@@ -15,9 +15,9 @@ def to128(uuid_16):
 
 def get_head():
     return """
-package com.eyesore.bluetooth;
+package com.eyesoreinc.bluetooth;
 
-import com.eyesore.bluetooth.BluetoothServiceId;
+import com.eyesoreinc.bluetooth.BluetoothServiceId;
 
 
 // constants representing common bluetooth service Ids
