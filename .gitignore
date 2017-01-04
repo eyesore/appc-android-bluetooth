@@ -2,7 +2,6 @@ tmp
 bin
 build
 libs
-*.zip
 .apt_generated
 .DS_Store
 .svn
