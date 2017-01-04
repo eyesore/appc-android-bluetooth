@@ -13,6 +13,7 @@
                     </intent-filter>
                 </service>
             </application>
+             <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
             <uses-permission android:name="android.permission.BLUETOOTH"/>
             <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
             <!-- http://stackoverflow.com/questions/3442800/android-bluetooth-software-caused-connection-abort-ioexception -->
