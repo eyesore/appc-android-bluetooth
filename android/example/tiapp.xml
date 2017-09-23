@@ -1,0 +1,15 @@
+<!-- Put this to your tiapp.xml -->
+
+<android xmlns:android="http://schemas.android.com/apk/res/android">
+	<manifest android:versionCode="1" android:versionName="1.0.0"
+	package="com.psp.android.test" xmlns:android="http://schemas.android.com/apk/res/android">
+		<uses-sdk android:minSdkVersion="16" targetSdkVersion="23"/>
+		<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+		<uses-permission android:name="android.permission.BLUETOOTH"/>
+		<uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+		<!-- http://stackoverflow.com/questions/3442800/android-bluetooth-software-caused-connection-abort-ioexception -->
+		<uses-permission android:name="android.permission.READ_PHONE_STATE"></uses-permission>
+		<uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"></uses-permission>
+
+	</manifest>
+</android>

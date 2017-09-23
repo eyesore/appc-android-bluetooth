@@ -12,6 +12,14 @@
  * Author: Trey Jones <trey@eyesoreinc.com>
  */
 
+ var permissions = ['android.permission.ACCESS_COARSE_LOCATION', 'android.permission.BLUETOOTH', 'android.permission.BLUETOOTH_ADMIN', 'android.permission.READ_PHONE_STATE'];
+ Ti.Android.requestPermissions(permissions, function(e) {
+ 	if (e.success) {
+ 		Ti.API.info("SUCCESS");
+ 	} else {
+ 		Ti.API.info("ERROR: " + e.error);
+ 	}
+ });
 
 // this sets the background color of the master UIView (when there are no windows/tab groups on it)
 Titanium.UI.setBackgroundColor('#000');

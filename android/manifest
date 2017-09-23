@@ -2,10 +2,10 @@
 # this is your module manifest and used by Titanium
 # during compilation, packaging, distribution, etc.
 #
-version: 1.3
-apiversion: 2
-architectures: armeabi armeabi-v7a x86 
-description: bluetooth
+version: 2.0
+apiversion: 3
+architectures: armeabi-v7a x86
+description: Titanium Bluetooth module for Android
 author: Trey Jones
 license: Specify your license
 copyright: Copyright (c) 2014 by Your Company
@@ -15,4 +15,4 @@ name: bluetooth
 moduleid: com.eyesoreinc.bluetooth
 guid: 06913ba9-8d40-4b93-91e8-2ce6364f73cc
 platform: android
-minsdk: 5.5.1.GA
+minsdk: 6.0.0.GA
